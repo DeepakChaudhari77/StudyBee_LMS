@@ -39,7 +39,7 @@ const DashBoard = () => {
           <div className='flex items-center gap-3 shadow-[0px_4px_15px_2px_rgba(0,0,0,0.1)] border border-blue-500 p-4 w-60 rounded-md'>
             <img src={assets.earning_icon} alt="patients icon" />
             <div>
-              <p className='text-2xl font-medium text-gray-600'>{dashboardData.enrolledStudentsData.length}</p>
+              <p className='text-2xl font-medium text-gray-600'>{dashboardData.totalEarnings}</p>
               <p className='text-base text-gray-500'>Total Earnings</p>
             </div>
           </div>
