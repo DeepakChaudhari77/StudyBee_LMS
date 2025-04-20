@@ -1,7 +1,7 @@
 import { Webhook } from "svix";
 import User from "../models/User.js";
 import Stripe from "stripe";
-import { Purchase } from "../models/Purchase.js";
+import Purchase from "../models/Purchase.js";
 import Course from '../models/Course.js'
 
 //API controller function to manage clerk user with database
@@ -58,9 +58,11 @@ export const clerkWebhooks = async (req, res) => {
     }
 }
 
-const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export const stripeWebhooks = async (request, response) => {
+
+    const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
+
     const sig = request.headers['stripe-signature'];
 
     let event;
@@ -87,9 +89,8 @@ export const stripeWebhooks = async (request, response) => {
             const purchaseData = await Purchase.findById(purchaseId)
             const userData = await User.findById(purchaseData.userId)
             const courseData = await Course.findById(purchaseData.courseId.toString())
-            break;
 
-            courseData.enrolledStudents.push(userData)
+            courseData.enrolledStudents.push(userData._id)
             await courseData.save()
             userData.enrolledCourses.push(courseData._id)
 
@@ -97,7 +98,9 @@ export const stripeWebhooks = async (request, response) => {
 
             purchaseData.status = 'completed'
             await purchaseData.save()
+            console.log('PaymentIntent was successful!');
 
+            break;
         }
         case 'payment_intent.payment_failed': {
             const paymentIntent = event.data.object;
@@ -116,7 +119,7 @@ export const stripeWebhooks = async (request, response) => {
         }
         // ... handle other event types
         default:
-            console.log(`Unhandled event type ${event.type}`);
+            response.json({ message: `Unhandled event type ${event.type}` })
     }
 
     // Return a response to acknowledge receipt of the event

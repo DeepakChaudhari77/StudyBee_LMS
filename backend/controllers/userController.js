@@ -1,15 +1,16 @@
 import Stripe from "stripe"
 import Course from "../models/Course.js"
-import { Purchase } from "../models/Purchase.js"
+import Purchase from "../models/Purchase.js"
 import User from "../models/User.js"
+import CourseProgress from "../models/CourseProgress.js"
 
 //Get User Data
-export const getUserData = async (req, res) =>{
+export const getUserData = async (req, res) => {
     try {
         const userId = req.auth.userId
         const user = await User.findById(userId)
 
-        if(!user){
+        if (!user) {
             return res.json({ success: false, message: 'User Not Found' })
         }
 
@@ -20,12 +21,12 @@ export const getUserData = async (req, res) =>{
 }
 
 //Users Enrolled Courses With Lecture Links
-export const userEnrolledCourses = async (req, res) =>{
+export const userEnrolledCourses = async (req, res) => {
     try {
         const userId = req.auth.userId
         const userData = await User.findById(userId).populate('enrolledCourses')
 
-        res.json({ success: true, enrolledCourses: userData.enrolledCourses})
+        res.json({ success: true, enrolledCourses: userData.enrolledCourses })
 
     } catch (error) {
         res.json({ success: false, message: error.message })
@@ -34,7 +35,7 @@ export const userEnrolledCourses = async (req, res) =>{
 
 
 //Purchase Course
-export const purchaseCourse = async (req, res) =>{
+export const purchaseCourse = async (req, res) => {
     try {
         const { courseId } = req.body
         const { origin } = req.headers
@@ -42,14 +43,14 @@ export const purchaseCourse = async (req, res) =>{
         const userData = await User.findById(userId)
         const courseData = await Course.findById(courseId)
 
-        if(!userData || !courseData){
-            return res.json({ success: false, message: 'Data Not found' })
+        if (!userData || !courseData) {
+            return res.json({ success: false, message: 'Data Not found', reason: `${userData || courseData}`, courseDetail: courseData})
         }
 
         const purchaseData = {
             courseId: courseData._id,
             userId,
-            amount: (courseData.coursePrice - courseData.discount * courseData.coursePrice /100).toFixed(2),
+            amount: (courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2),
         }
 
         const newPurchase = await Purchase.create(purchaseData)
@@ -81,8 +82,47 @@ export const purchaseCourse = async (req, res) =>{
             }
         })
 
-        res.json({ success: true, session_url: session.url})
+
+        res.json({ success: true, session_url: session.url, session: session })
     } catch (error) {
         res.json({ success: false, message: error.message })
+    }
+}
+
+//Update User Course Progress
+export const updateUserCourseProgress = async (req, res) => {
+    try {
+        const userId = req.auth.userId
+        const { courseId, lectureId } = req.body
+        const progressData = await CourseProgress.findOne({ userId, courseId })
+
+        if (progressData) {
+            if (progressData.lectureCompleted.includes(lectureId)) {
+                return res.json({ success: true, message: 'Lecture Already Completed' })
+            }
+
+            progressData.lectureCompleted.push(lectureId)
+            await progressData.save()
+        } else {
+            await CourseProgress.create({
+                userId,
+                courseId,
+                lectureCompleted: [lectureId]
+            })
+        }
+
+        res.json({ success: true, message: 'Progress Updated' })
+
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+//Get user Course Progress
+export const getUserCourseProgress = async (req, res) => {
+    try {
+
+    } catch (error) {
+
     }
 }
