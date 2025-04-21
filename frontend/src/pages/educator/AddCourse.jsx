@@ -94,7 +94,7 @@ const AddCourse = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault()
-      if(!image){
+      if (!image) {
         toast.error('Thumbnai Not Selected')
       }
 
@@ -102,6 +102,7 @@ const AddCourse = () => {
         courseTitle,
         courseDescription: quillRef.current.root.innerHTML,
         coursePrice: Number(coursePrice),
+        isPublished: true,
         discount: Number(discount),
         courseContent: chapters,
       }
