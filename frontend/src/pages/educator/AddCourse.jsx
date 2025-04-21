@@ -94,7 +94,7 @@ const AddCourse = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault()
-      if (!image) {
+      if(!image){
         toast.error('Thumbnai Not Selected')
       }
 
@@ -142,7 +142,7 @@ const AddCourse = () => {
   console.log(chapters.chapterContent)
   return (
     <div className='pt-20 h-screen overflow-scroll flex flex-col items-start justify-between md:px-8 px-4'>
-      <form onSubmit={() => handleSubmit} className='flex flex-col gap-4 max-w-md w-full text-gray-500'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4 max-w-md w-full text-gray-500'>
         <div className='flex flex-col gap-1 '>
           <p>Course Title</p>
           <input onChange={e => setCourseTitle(e.target.value)} value={courseTitle} type="text" placeholder='Type here' className='outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500' required />
