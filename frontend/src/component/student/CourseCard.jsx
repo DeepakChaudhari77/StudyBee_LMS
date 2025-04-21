@@ -12,15 +12,15 @@ const CourseCard = ({ course }) => {
       <img className='w-full' src={course.courseThumbnail} alt="" />
       <div className='p-3 text-left'>
         <h3 className='text-base font-semibold'>{course.courseTitle}</h3>
-        <p className='text-gray-500'>Deepak Chaudhari</p>
+        <p className='text-gray-500'>{course.educator.name}</p>
         <div className='flex items-center space-x-2'>
-          <p>{calculateRating(course)}</p>
+          {/* <p>{calculateRating(course)}</p>
           <div className='flex'>
             {[...Array(5)].map((_, i) => (
               <img key={i} src={i < Math.floor(calculateRating(course)) ? assets.star : assets.star_blank} alt="" className='w-3.5 h-3.5' />
             ))}
-          </div>
-          <p className='text-gray-500'>{course.courseRatings.length}</p>
+          </div> */}
+          <p className='text-gray-500'>{}</p>
         </div>
         <p className='text-base font-semibold text-gray-800'>{currency}{(course.coursePrice - course.discount * course.coursePrice / 100).toFixed(2)}</p>
       </div>

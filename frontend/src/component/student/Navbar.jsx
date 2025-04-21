@@ -3,10 +3,12 @@ import { assets } from '../../../public/assets/assets';
 import { Link, NavLink } from 'react-router';
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react';
 import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { navigate, isEducator } = useContext(AppContext)
+  const { navigate, isEducator, backendUrl, setIsEducator, getToken } = useContext(AppContext)
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -15,6 +17,25 @@ const Navbar = () => {
   const { openSignIn } = useClerk()
   const { user } = useUser()
 
+  const becomeEducator = async () => {
+    try {
+      if (isEducator) {
+        navigate('/educator')
+        return;
+      }
+      const token = await getToken()
+      const { data } = await axios.get(backendUrl + '/api/educator/update-role', { headers: { Authorization: `Bearer ${token}` } })
+
+      if (data.success) {
+        setIsEducator(true)
+        toast.success(data.message)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
   return (
     <nav className="fixed top-0 bg-white dark:bg-gray-900 border-b border-gray-700 min-w-full mx-auto z-1000">
       <div className="px-8 md:px-40 flex items-center justify-between mx-auto py-4 flex-nowrap">
@@ -53,8 +74,8 @@ const Navbar = () => {
           <div className='hidden md:flex item-center gap-3 text-gray-500'>
             <div className='flex items-center text-wrap gap-5'>
               {user && <>
-                <button onClick={() => { navigate('/educator') }}>{isEducator ? 'Educator Dashboard' : 'Become Educator'}</button>
-                | <Link to='/my-enrollment'>My Enrollments</Link>
+                <button onClick={becomeEducator}>{isEducator ? 'Educator Dashboard' : 'Become Educator'}</button>
+                | <Link to='/my-enrollments'>My Enrollments</Link>
               </>}
             </div>
             {user ? <UserButton /> :
@@ -66,8 +87,8 @@ const Navbar = () => {
           <div className='md:hidden flex items-center gap-2 text-gray-500'>
             <div className='flex items-center gap-1 sm:gap-2 max-sm:text-xs text-wrap'>
               {user && <>
-                <button onClick={() => { navigate('/educator') }}>{isEducator ? 'Educator Dashboard' : 'Become Educator'}</button>
-                | <Link to='/my-enrollment'>My Enrollments</Link>
+                <button onClick={becomeEducator}>{isEducator ? 'Educator Dashboard' : 'Become Educator'}</button>
+                | <Link to='/my-enrollments'>My Enrollments</Link>
               </>}
             </div>
             {

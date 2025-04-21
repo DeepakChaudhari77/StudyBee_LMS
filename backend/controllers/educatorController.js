@@ -66,7 +66,7 @@ export const educatorDashboardData = async (req, res) =>{
     try {
         const educator = req.auth.userId;
         const courses = await Course.find({educator});
-        const totelCourses = courses.length;
+        const totalCourses = courses.length;
 
         const courseIds = courses.map(course => course._id)
 
@@ -94,7 +94,7 @@ export const educatorDashboardData = async (req, res) =>{
         }
 
         res.json({ success: true, dashboardData: {
-            totalEarnings, enrolledStudentsData, totelCourses
+            totalEarnings, enrolledStudentsData, totalCourses
         }})
 
     } catch (error) {

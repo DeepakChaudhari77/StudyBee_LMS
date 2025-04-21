@@ -2,19 +2,34 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../../context/AppContext'
 import { assets, dummyDashboardData } from '../../../public/assets/assets'
 import Loading from '../../component/student/Loading'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const DashBoard = () => {
 
-  const { currency } = useContext(AppContext)
+  const { currency, backendUrl, getToken, isEducator } = useContext(AppContext)
   const [dashboardData, setDashboardData] = useState(null)
 
   const fetchDashboardData = async () => {
-    setDashboardData(dummyDashboardData)
+    try {
+      const token = await getToken()
+      const { data } = await axios.get(backendUrl + '/api/educator/dashboard', { headers: { Authorization: `Bearer ${token}` } })
+
+      if (data.success) {
+        setDashboardData(data.dashboardData)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    if (isEducator) {
+      fetchDashboardData()
+    }
+  }, [isEducator])
 
   return dashboardData ? (
     <div className='pt-24 min-h-screen flex flex-col items-start justify-between gap-8 px-4 md:px-8'>
@@ -39,7 +54,7 @@ const DashBoard = () => {
           <div className='flex items-center gap-3 shadow-[0px_4px_15px_2px_rgba(0,0,0,0.1)] border border-blue-500 p-4 w-60 rounded-md'>
             <img src={assets.earning_icon} alt="patients icon" />
             <div>
-              <p className='text-2xl font-medium text-gray-600'>{dashboardData.totalEarnings}</p>
+              <p className='text-2xl font-medium text-gray-600'>{'$' + Math.floor(dashboardData.totalEarnings)}</p>
               <p className='text-base text-gray-500'>Total Earnings</p>
             </div>
           </div>
@@ -66,7 +81,7 @@ const DashBoard = () => {
                       <img src={item.student.imageUrl}
                         alt="Profile"
                         className='w-9 h-9 rounded-full' />
-                        <span>{item.student.name}</span>
+                      <span>{item.student.name}</span>
                     </td>
                     <td className='px-4 py-3 truncate'>{item.courseTitle}</td>
                   </tr>

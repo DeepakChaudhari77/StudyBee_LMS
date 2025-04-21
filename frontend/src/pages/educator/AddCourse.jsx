@@ -1,10 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import uniqid from 'uniqid';
 import Quill from 'quill';
 import { assets } from '../../../public/assets/assets';
+import { AppContext } from '../../context/AppContext';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 
 const AddCourse = () => {
+
+  const { backendUrl, getToken } = useContext(AppContext)
   const quillRef = useRef(null);
   const editorRef = useRef(null);
 
@@ -47,14 +52,14 @@ const AddCourse = () => {
 
   }
 
-  const handleLecture = (action, chapterId, lectureIndex) =>{
-    if(action === 'add') {
+  const handleLecture = (action, chapterId, lectureIndex) => {
+    if (action === 'add') {
       setCurrentChapterId(chapterId);
       setShowPopup(true);
-    } else if(action === 'remove'){
+    } else if (action === 'remove') {
       setChapters(
         chapters.map((chapter) => {
-          if(chapter.chapterId === chapterId) {
+          if (chapter.chapterId === chapterId) {
             chapter.chapterContent.splice(lectureIndex, 1);
           }
           return chapter;
@@ -63,12 +68,12 @@ const AddCourse = () => {
     }
   }
 
-  const addLecture = () =>{
+  const addLecture = () => {
     setChapters(
-      chapters.map((chapter) =>{
-        if(chapter.chapterId === currentChapterId){
+      chapters.map((chapter) => {
+        if (chapter.chapterId === currentChapterId) {
           const newLecture = {
-            ...lectureDetails, 
+            ...lectureDetails,
             lectureOrder: chapter.chapterContent.length > 0 ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1 : 1,
             lectureId: uniqid()
           };
@@ -86,8 +91,43 @@ const AddCourse = () => {
     });
   }
 
-  const handleSubmit = async (e) =>{
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault()
+      if (!image) {
+        toast.error('Thumbnai Not Selected')
+      }
+
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(coursePrice),
+        discount: Number(discount),
+        courseContent: chapters,
+      }
+
+      const formData = new FormData()
+      formData.append('courseData', JSON.stringify(courseData))
+      formData.append('image', image)
+
+      const token = await getToken()
+      const { data } = await axios.post(backendUrl + '/api/educator/add-course', formData, { headers: { Authorization: `Bearer ${token}` } })
+
+      if (data.success) {
+        toast.success(data.message)
+        setCourseTitle('')
+        setCoursePrice(0)
+        setDiscount(0)
+        setImage(null)
+        setChapters([])
+        quillRef.current.root.innerHTML = ''
+      } else {
+        toast.error(data.message)
+      }
+
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
 
   useEffect(() => {
@@ -99,6 +139,7 @@ const AddCourse = () => {
     }
   }, [])
 
+  console.log(chapters.chapterContent)
   return (
     <div className='pt-20 h-screen overflow-scroll flex flex-col items-start justify-between md:px-8 px-4'>
       <form onSubmit={() => handleSubmit} className='flex flex-col gap-4 max-w-md w-full text-gray-500'>
@@ -169,23 +210,23 @@ const AddCourse = () => {
 
                 <div className='mb-2'>
                   <p>Lecture Title</p>
-                  <input type="text" className='mt-1 block w-full border rounded py-1 px-2' value={lectureDetails.lectureTitle} onChange={(e) => setLectureDetails({ ...lectureDetails.lectureTitle, lectureTitle: e.target.value })} />
+                  <input type="text" className='mt-1 block w-full border rounded py-1 px-2' value={lectureDetails.lectureTitle} onChange={(e) => setLectureDetails({ ...lectureDetails, lectureTitle: e.target.value })} />
                 </div>
 
                 <div className='mb-2'>
                   <p>Duration (minutes)</p>
-                  <input type="number" className='mt-1 block w-full border rounded py-1 px-2' value={lectureDetails.lectureDuration} onChange={(e) => setLectureDetails({ ...lectureDetails.lectureDuration, lectureDuration: e.target.value })} />
+                  <input type="number" className='mt-1 block w-full border rounded py-1 px-2' value={lectureDetails.lectureDuration} onChange={(e) => setLectureDetails({ ...lectureDetails, lectureDuration: e.target.value })} />
                 </div>
 
 
                 <div className='mb-2'>
                   <p>Lecture URL</p>
-                  <input type="text" className='mt-1 block w-full border rounded py-1 px-2' value={lectureDetails.lectureUrl} onChange={(e) => setLectureDetails({ ...lectureDetails.lectureUrl, lectureUrl: e.target.value })} />
+                  <input type="text" className='mt-1 block w-full border rounded py-1 px-2' value={lectureDetails.lectureUrl} onChange={(e) => setLectureDetails({ ...lectureDetails, lectureUrl: e.target.value })} />
                 </div>
 
                 <div className='flex gap-2 my-4'>
                   <p>Is Preview Free?</p>
-                  <input type="checkbox" className='mt-1 scale-125' checked={lectureDetails.isPreviewFree} onChange={(e) => setLectureDetails({ ...lectureDetails.isPreviewFree, isPreviewFree: e.target.checked })} />
+                  <input type="checkbox" className='mt-1 scale-125' checked={lectureDetails.isPreviewFree} onChange={(e) => setLectureDetails({ ...lectureDetails, isPreviewFree: e.target.checked })} />
                 </div>
 
                 <button onClick={addLecture} type='button' className='w-full bg-blue-400 text-white px-4 py-2 rounded'>Add</button>
