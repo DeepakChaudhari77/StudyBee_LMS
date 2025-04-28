@@ -19,17 +19,17 @@ const Player = () => {
   const [openSection, setOpenSection] = useState({})
   const [playerData, setPlayerData] = useState(null)
   const [progressData, setProgressData] = useState(null)
-  // const [initialRating, setInitialRating] = useState(0)
+  const [initialRating, setInitialRating] = useState(0)
 
   const getCourseData = () => {
     enrolledCourses.map((course) => {
       if (course._id === courseId) {
         setCourseData(course)
-        // course.courseRatings.map((item) => {
-        //   if (item.userId === userData._id) {
-        //     setInitialRating(item.rating)
-        //   }
-        // })
+        course.courseRatings.map((item) => {
+          if (item.userId === userData._id) {
+            setInitialRating(item.rating)
+          }
+        })
       }
     })
   }
@@ -143,10 +143,9 @@ const Player = () => {
           </div>
           <div className='flex items-center gap-2 py-3 mt-10'>
             <h1 className='text-xl font-bold'>Rate this Course</h1>
-            <Rating  onRate={handleRate} />
+            <Rating onRate={handleRate} />
           </div>
         </div>
-        {/* initialRating={initialRating} */}
 
 
         {/* right column */}

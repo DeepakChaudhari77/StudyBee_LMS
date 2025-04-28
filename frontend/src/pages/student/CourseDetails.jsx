@@ -45,12 +45,12 @@ const CourseDetails = () => {
 
       const token = await getToken();
 
-      const {data} = await axios.post(backendUrl + '/api/user/purchase', {courseId: courseData._id}, {headers: {Authorization: `Bearer ${token}`}})
+      const { data } = await axios.post(backendUrl + '/api/user/purchase', { courseId: courseData._id }, { headers: { Authorization: `Bearer ${token}` } })
 
-      if(data.success){
-        const {session_url} = data
+      if (data.success) {
+        const { session_url } = data
         window.location.replace(session_url)
-      }else{
+      } else {
         toast.error(data.message)
       }
     } catch (error) {
@@ -90,13 +90,13 @@ const CourseDetails = () => {
 
           {/* revirew and rating */}
           <div className='flex items-center space-x-2 pt-3 pb-1 text-sm'>
-            {/* <p></p>
+            <p></p>
             <div className='flex'>
               {[...Array(5)].map((_, i) => (
                 <img key={i} src={i < Math.floor(calculateRating(courseData)) ? assets.star : assets.star_blank} alt="" className='w-3.5 h-3.5' />
               ))}
             </div>
-            <p className='text-blue-600'>({courseData.courseRatings.length} {courseData.courseRatings.length > 1 ? 'ratings' : 'rating'})</p> */}
+            <p className='text-blue-600'>({courseData.courseRatings.length} {courseData.courseRatings.length > 1 ? 'ratings' : 'rating'})</p>
 
             <p>{courseData.enrolledStudents.length} {courseData.enrolledStudents.length > 1 ? 'students' : 'student'}</p>
           </div>

@@ -25,7 +25,7 @@ const courseSchema = new mongoose.Schema({
     discount: {type: Number, required: true, min: 0, max:100},
     courseContent: [chapterSchema],
 
-    courseRatins:[
+    courseRatings:[
         {userId: {type: String}, rating:{type: Number, min: 1, max: 5}}
     ],
     educator: {type: String, ref: "User", required: true},
